@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "81:80"
+    volumes:
+      - ./:/var/www
+      - ./.docker/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+      - db
+
+  db:
+    image: postgres
+    container_name: postgres
+    volumes:
+      - ./.docker/postgresql/data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+        - POSTGRES_DB=${DB_DATABASE}
+        - POSTGRES_USER=${DB_USERNAME}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+  app:
+    container_name: blog
+    build:
+      context: .docker/php
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www
+    ports:
+      - "9000:9000"
+    working_dir: /var/www
